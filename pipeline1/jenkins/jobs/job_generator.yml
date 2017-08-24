@@ -1,0 +1,6 @@
+- job:
+    name: job-generator
+    builders:
+      - dsl:
+          script-text:
+             !include-raw dsl_jobs.dsl
