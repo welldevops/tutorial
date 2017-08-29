@@ -1,6 +1,14 @@
 - job:
     name: job-generator
+    scm:
+      - git:
+         url: https://github.com/simplytunde/tutorial.git
+         branches:
+          - origin/master
     builders:
       - dsl:
-          script-text:
-             !include-raw dsl_jobs.dsl
+          target: "pipeline1/jenkins/jobs/**/*.groovy"
+    triggers:
+      - pollscm:
+          cron: "*/30 * * * *"
+          ignore-post-commit-hooks: True
