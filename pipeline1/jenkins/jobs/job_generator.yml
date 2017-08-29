@@ -7,8 +7,8 @@
           - origin/master
     builders:
       - dsl:
-          target: "pipeline1/jenkins/jobs/**/*.groovy"
+          target: "pipeline1/jenkins/jobs/**/*.dsl"
     triggers:
       - pollscm:
-          cron: "*/30 * * * *"
+          cron: "H/2 * * * *"
           ignore-post-commit-hooks: True
