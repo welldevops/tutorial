@@ -22,7 +22,6 @@ job('create-infrastructure'){
         }
     }
     steps {
-        shell("cd pipeline1/terraform")
-        shell("terraform plan")
+        shell("cd pipeline1/terraform && terraform init && terraform plan")
     }
 }
