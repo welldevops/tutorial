@@ -1,4 +1,4 @@
-def appGitUrl="https://github.com/simplytunde/docker"
+def appGitUrl="https://github.com/simplytunde/tutorial"
 def appGitUrlBranch="master"
 job('deploy-to-instance'){
      scm {
