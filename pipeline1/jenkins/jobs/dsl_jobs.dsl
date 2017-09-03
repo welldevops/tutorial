@@ -11,3 +11,18 @@ job('deploy-to-instance'){
         }
     }
 }
+job('create-infrastructure'){
+     scm {
+        git {
+           remote {
+               name('origin')
+               url(appGitUrl)
+           }
+           branch(appGitUrlBranch)
+        }
+    }
+    steps {
+        shell("cd pipeline1/terraform")
+        shell("terraform plan")
+    }
+}
