@@ -1,0 +1,6 @@
+-  hosts: localhost
+   vars_files:
+     - ../vars/calendar.yml
+   become: true
+   roles:
+     - calendar

@@ -17,7 +17,7 @@ resource "aws_subnet" "pipeline_1_vpc_subnet_1" {
   vpc_id                  = "${aws_vpc.pipeline_1_vpc.id}"
   cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = ""
+  availability_zone       = "${var.aws_region}a"
   tags {
     Name = "pipeline_1_vpc_subnet_1"
   }
@@ -27,11 +27,13 @@ resource "aws_subnet" "pipeline_1_vpc_subnet_1" {
 resource "aws_subnet" "pipeline_1_vpc_subnet_2" {
   vpc_id                  = "${aws_vpc.pipeline_1_vpc.id}"
   cidr_block              = "10.0.1.0/24"
+  availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
   tags {
     Name = "pipeline_1_vpc_subnet_2"
   }
 }
+
 #create internet gateway to attach to our instance
 resource "aws_internet_gateway" "pipeline_1_vpc_igw" {
   vpc_id = "${aws_vpc.pipeline_1_vpc.id}"
@@ -83,8 +85,8 @@ resource "aws_security_group" "pipeline_1_security_group_ec2" {
 
   # HTTP access from anywhere
   ingress {
-    from_port       = 80
-    to_port         = 80
+    from_port       = 0
+    to_port         = 0
     protocol        = "tcp"
     security_groups = ["${aws_security_group.pipeline_1_security_group_elb.id}"]
   }
@@ -124,68 +126,38 @@ resource "aws_security_group" "pipeline_1_security_group_elb" {
   }
 }
 
-resource "aws_elb" "pipeline_1_elb" {
-  name = "pipeline-1-elb"
-
-  # The same availability zone as our instance
-  subnets = ["${aws_subnet.pipeline_1_vpc_subnet_1.id}","${aws_subnet.pipeline_1_vpc_subnet_2.id}"]
-
-  security_groups = ["${aws_security_group.pipeline_1_security_group_elb.id}"]
-
-  listener {
-    instance_port     = 80
-    instance_protocol = "http"
-    lb_port           = 80
-    lb_protocol       = "http"
-  }
-
-  health_check {
-    healthy_threshold   = 10
-    unhealthy_threshold = 2
-    timeout             = 3
-    target              = "HTTP:80/"
-    interval            = 30
-  }
-
-  # The instance is registered automatically
-  cross_zone_load_balancing   = true
-  idle_timeout                = 400
-  connection_draining         = true
-  connection_draining_timeout = 400
-}
-
 #create the key pair to use
 resource "aws_key_pair" "pipeline_1_key_pair" {
   key_name   = "pipeline-key"
   public_key = "${file("files/public.key")}"
 }
 #create the launch configuration configuration
-resource "aws_launch_configuration" "pipeline_1_launch_config" {
-  name          = "pipeline-1-launch-config"
-  image_id      = "${lookup(var.aws_amis, var.aws_region)}"
-  instance_type = "${var.instance_type}"
 
-  # Security group
-  security_groups = ["${aws_security_group.pipeline_1_security_group_ec2.id}"]
-  user_data       = "${file("files/userdata.sh")}"
-  key_name        = "${aws_key_pair.pipeline_1_key_pair.key_name}"
+
+module "qa_environment_blue" {
+  source = "./modules/bluegreen"
+  vpc_id = "${aws_vpc.pipeline_1_vpc.id}"
+  aws_region = "${var.aws_region}"
+  environment = "qa"
+  deployment = "blue"
+  asg_secgroup = "${aws_security_group.pipeline_1_security_group_ec2.id}"
+  elb_secgroup = "${aws_security_group.pipeline_1_security_group_elb.id}"
 }
-
-#create our autoscaling group with launch config
-
-resource "aws_autoscaling_group" "pipeline_1_asg" {
-  name                 = "pipeline-1-autoscaling-group"
-  max_size             = "${var.asg_max}"
-  min_size             = "${var.asg_min}"
-  desired_capacity     = "${var.asg_desired}"
-  force_delete         = true
-  launch_configuration = "${aws_launch_configuration.pipeline_1_launch_config.name}"
-  load_balancers       = ["${aws_elb.pipeline_1_elb.name}"]
-
-  vpc_zone_identifier = ["${aws_subnet.pipeline_1_vpc_subnet_1.id}","${aws_subnet.pipeline_1_vpc_subnet_2.id}"]
-  tag {
-    key                 = "Name"
-    value               = "pipeline-1-asg"
-    propagate_at_launch = "true"
-  }
+module "staging_environment_blue" {
+  source = "./modules/bluegreen"
+  vpc_id = "${aws_vpc.pipeline_1_vpc.id}"
+  aws_region = "${var.aws_region}"
+  environment = "staging"
+  deployment = "blue"
+  asg_secgroup = "${aws_security_group.pipeline_1_security_group_ec2.id}"
+  elb_secgroup = "${aws_security_group.pipeline_1_security_group_elb.id}"
+}
+module "staging_environment_green" {
+  source = "./modules/bluegreen"
+  vpc_id = "${aws_vpc.pipeline_1_vpc.id}"
+  aws_region = "${var.aws_region}"
+  environment = "staging"
+  deployment = "green"
+  asg_secgroup = "${aws_security_group.pipeline_1_security_group_ec2.id}"
+  elb_secgroup = "${aws_security_group.pipeline_1_security_group_elb.id}"
 }

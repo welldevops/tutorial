@@ -1,1 +1,5 @@
 jenkins_jobs.ini
+.tfstate
+.tfstate.backup
+commands.txt
+.retry

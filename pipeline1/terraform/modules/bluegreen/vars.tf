@@ -1,6 +1,7 @@
+variable vpc_id{
+   description="VPC where environment will be created"
+}
 variable "aws_region"{
-  description = "This is the region where our template will be provisioned"
-  default= "us-west-2"
 }
 variable "aws_amis" {
   description = "This is the AMI to use depending on the region"
@@ -12,6 +13,18 @@ variable "aws_amis" {
 variable "instance_type" {
    description="EC2 Instance type"
    default="t2.micro"
+}
+variable environment {
+   description = "Environment to create"
+}
+variable deployment {
+   description=" Blue or green deployment"
+}
+variable asg_secgroup {
+   description=" Name of the security group"
+}
+variable elb_secgroup {
+   description=" Name of the security group"
 }
 variable "asg_max" {
   default="2"

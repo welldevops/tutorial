@@ -1,0 +1,20 @@
+-  hosts: localhost
+   vars_files:
+     - ../vars/calendar.yml
+   tasks:
+     - ec2_remote_facts:
+         filters:
+            instance-state-name: running
+            "tag:Env": qa
+         region: "{{aws_region}}"
+       register: ec2_info
+     - name: add env hosts to appservers group
+       add_host: hostname="{{ item.public_ip_address }}" groupname=appservers
+       with_items: "{{ ec2_info.instances }}"
+
+-  hosts: appservers
+   vars_files:
+     - ../vars/calendar.yml
+   become: true
+   roles:
+     - calendar
