@@ -7,7 +7,7 @@
           - origin/master
     builders:
       - dsl:
-          target: "pipeline1/jenkins/jobs/**/*.dsl"
+          target: "pipeline1/docker/jenkins/jobs/**/*.dsl"
     triggers:
       - pollscm:
           cron: "H/2 * * * *"

@@ -11,7 +11,7 @@ job('deploy-to-qa'){
         }
     }
     steps {
-        shell("cd ${WORKSPACE}/tutorial/pipeline1/ansible && ansible-playbook playbooks/install_locally.yml -i inventories/calendarapp.yml --extra-vars "release=feature"")
+        shell("cd ${WORKSPACE}/tutorial/pipeline1/ansible && ansible-playbook playbooks/install_locally.yml -i inventories/calendarapp.yml --extra-vars 'release=feature'")
     }
 }
 job('create-infrastructure'){
