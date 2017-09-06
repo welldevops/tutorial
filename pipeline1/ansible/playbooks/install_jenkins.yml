@@ -13,5 +13,6 @@
        with_items: "{{ ec2_info.instances }}"
 
 -  hosts: jenkins_servers
+   become: true
    roles:
      - jenkins

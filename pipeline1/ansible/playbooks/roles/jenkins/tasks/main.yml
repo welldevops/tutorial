@@ -1,3 +1,4 @@
+- command: yum makecache fast
 - name: install pip
   become: true
   yum:
@@ -7,6 +8,13 @@
       - epel-release
       - python-pip
       - git
+      - docker
+- name: enable and start docker
+  become: true
+  service:
+    name: docker
+    state: started
+    enabled: yes
 
 -  name: Download the application from git
    git:
@@ -16,21 +24,20 @@
 - name: install python docker
   become: true
   pip:
-    name: docker-py
+    name: docker
 - shell: pwd && ls ~/tutorial/pipeline1/docker/jenkins
   register: haha
 - debug: var=haha
 - name: Build image and with buildargs
-  docker_image:
-      name: blackpearl/jenkins:v1.0
+  command: sudo docker pull blackpearl/jenkins:v1.0
 - name: Run docker init
-  command: docker swarm init
+  command: sudo docker swarm init
   args:
     creates: /tmp/docker-init-started
 - file:
     path: /tmp/docker-init-started
     state: touch
 - name: Start the app
-  command: docker stack deploy -c jenkins.yml jenkins_service
+  command: sudo docker stack deploy -c jenkins.yml jenkins_service
   args:
     chdir: "~/tutorial/pipeline1/docker/jenkins"
