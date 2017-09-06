@@ -4,7 +4,7 @@ provider "aws" {
 module "qa_environment_blue" {
   source = "../modules/bluegreen"
   aws_region = "${var.aws_region}"
-  version = "${var.image_version}"
+  release = "${var.image_release}"
   environment = "qa"
   deployment = "1"
 }

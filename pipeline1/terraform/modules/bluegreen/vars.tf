@@ -1,7 +1,7 @@
 variable "aws_region"{
  default="us-west-2"
 }
-variable "version" {
+variable "release" {
    description = "AMI version being deployed"
 }
 variable "zone_name" {

@@ -16,7 +16,7 @@
         git:
           repo: https://github.com/simplytunde/time-management.git
           dest: /var/app/time-management
-          version: master
+          version: "{{ release }}"
      -  name: Run npm install
         command: npm install
         args:

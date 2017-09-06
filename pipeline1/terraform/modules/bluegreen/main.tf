@@ -10,8 +10,8 @@ data "aws_subnet_ids" "all" {
 data "aws_ami" "deployment_image" {
     most_recent = true
     filter {
-      name = "tag:version"
-      values = ["${var.version}"]
+      name = "tag:release"
+      values = ["${var.release}"]
     }
     owners = ["self"]
 }
@@ -24,7 +24,7 @@ data "aws_security_group" "elb" {
 }
 
 resource "aws_launch_configuration" "pipeline_1_launch_config" {
-  # name          = "pipeline-1-launch-config-${var.environment}-${var.deployment}"
+  # name          = "pipeline1-launch-config-${var.environment}-${var.deployment}"
   image_id      = "${data.aws_ami.deployment_image.image_id}"
   instance_type = "${var.instance_type}"
 
@@ -54,7 +54,7 @@ resource "aws_elb" "pipeline_1_elb" {
   }
 
   health_check {
-    healthy_threshold   = 10
+    healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
     target              = "TCP:3000"
@@ -74,10 +74,12 @@ resource "aws_elb" "pipeline_1_elb" {
 
 
 resource "aws_autoscaling_group" "pipeline_1_asg" {
-  name                 = "pipeline-1-asg-${var.environment}-${var.deployment}"
+  name                 = "pipeline-1-asg-${aws_launch_configuration.pipeline_1_launch_config.name}"
   max_size             = "${var.asg_max}"
   min_size             = "${var.asg_min}"
   desired_capacity     = "${var.asg_desired}"
+  min_elb_capacity     = "${var.asg_min}"
+
   force_delete         = true
   launch_configuration = "${aws_launch_configuration.pipeline_1_launch_config.name}"
   load_balancers       = ["${aws_elb.pipeline_1_elb.name}"]

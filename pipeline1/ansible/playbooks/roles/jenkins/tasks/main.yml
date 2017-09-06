@@ -19,7 +19,7 @@
     name: docker
 - name: Build image and with buildargs
   docker_image:
-      path: "~/tutorial/pipeline1/playbooks/roles/jenkins/files"
+      path: /home/ec2-user/tutorial/pipeline1/ansible/playbooks/roles/jenkins/files
       name: tunde/jenkins:v1
 - name: Run docker init
   command: docker swarm init

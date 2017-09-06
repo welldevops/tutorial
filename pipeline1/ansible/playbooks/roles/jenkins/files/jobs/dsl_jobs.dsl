@@ -1,6 +1,6 @@
 def appGitUrl="https://github.com/simplytunde/tutorial"
 def appGitUrlBranch="master"
-job('deploy-to-instance'){
+job('deploy-to-qa'){
      scm {
         git {
            remote {
@@ -9,6 +9,9 @@ job('deploy-to-instance'){
            }
            branch(appGitUrlBranch)
         }
+    }
+    steps {
+        shell("cd pipeline1/terraform && terraform init && terraform plan")
     }
 }
 job('create-infrastructure'){
