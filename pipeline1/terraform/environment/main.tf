@@ -126,6 +126,33 @@ resource "aws_security_group" "pipeline_1_security_group_elb" {
   }
 }
 
+resource "aws_security_group" "pipeline_1_security_group_jenkins" {
+  name        = "pipeline-1-security-group-jenkins"
+  description = "Only allows port 8080 and 22"
+  vpc_id      = "${aws_vpc.pipeline_1_vpc.id}"
+
+  # HTTP access from anywhere
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  # outbound internet access
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 #create the key pair to use
 resource "aws_key_pair" "pipeline_1_key_pair" {
   key_name   = "pipeline-key"
@@ -133,11 +160,11 @@ resource "aws_key_pair" "pipeline_1_key_pair" {
 }
 
 #create jenkins instance
-resource "aws_instance" "web" {
+resource "aws_instance" "jenkins" {
   ami           = "${lookup(var.aws_amis, var.aws_region)}"
   instance_type = "t2.medium"
   subnet_id     = "${aws_subnet.pipeline_1_vpc_subnet_1.id}"
-  vpc_security_group_ids  = ["${aws_security_group.pipeline_1_security_group_ec2.id}"]
+  vpc_security_group_ids  = ["${aws_security_group.pipeline_1_security_group_jenkins.id}"]
   key_name = "${aws_key_pair.pipeline_1_key_pair.key_name}"
   tags {
     Name = "Jenkins Box"
@@ -149,3 +176,14 @@ resource "aws_instance" "web" {
 }
 
 #create the launch configuration configuration
+#create route53 record for the environment
+data "aws_route53_zone" "main" {
+  name         = "${var.zone_name}"
+}
+resource "aws_route53_record" "jenkins_record" {
+  zone_id = "${data.aws_route53_zone.main.zone_id}"
+  name    = "jenkins.${data.aws_route53_zone.main.name}"
+  type    = "A"
+  ttl     = "5"
+  records = ["${aws_instance.jenkins.public_ip}"]
+}

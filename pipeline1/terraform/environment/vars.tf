@@ -27,3 +27,7 @@ variable "asg_min" {
 variable "asg_desired" {
   default="1"
 }
+variable "zone_name" {
+   description = "zone name for our DNS"
+   default     =  "opencoinproject.com."
+}

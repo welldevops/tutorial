@@ -38,6 +38,6 @@
     path: /tmp/docker-init-started
     state: touch
 - name: Start the app
-  command: sudo docker stack deploy -c jenkins.yml jenkins_service
+  command: sudo docker run -d -v /var/jenkins:/var/ -p 8080:8080 -p 50000:50000 blackpearl/jenkins:v1.0
   args:
     chdir: "~/tutorial/pipeline1/docker/jenkins"
