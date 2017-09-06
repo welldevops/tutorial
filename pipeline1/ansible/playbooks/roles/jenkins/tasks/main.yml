@@ -17,7 +17,7 @@
   become: true
   pip:
     name: docker-py
-- shell: pwd && ls ~/tutorial/pipeline1/ansible/playbooks/roles/jenkins/files
+- shell: pwd && ls ~/tutorial/pipeline1/docker/jenkins
   register: haha
 - debug: var=haha
 - name: Build image and with buildargs
@@ -33,4 +33,4 @@
 - name: Start the app
   command: docker stack deploy -c jenkins.yml jenkins_service
   args:
-    chdir: "~/tutorial/jenkins"
+    chdir: "~/tutorial/pipeline1/docker/jenkins"
