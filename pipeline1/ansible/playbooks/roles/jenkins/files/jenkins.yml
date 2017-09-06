@@ -1,0 +1,11 @@
+version: '3.1'
+
+services:
+
+  main:
+    image: tunde/jenkins:latest
+    volumes:
+      - /var/jenkins_home:/var/jenkins_home
+    ports:
+      - 8080:8080
+      - 50000:50000

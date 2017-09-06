@@ -87,7 +87,7 @@ resource "aws_security_group" "pipeline_1_security_group_ec2" {
   ingress {
     from_port       = 0
     to_port         = 0
-    protocol        = "tcp"
+    protocol        = "-1"
     security_groups = ["${aws_security_group.pipeline_1_security_group_elb.id}"]
   }
 
@@ -131,33 +131,21 @@ resource "aws_key_pair" "pipeline_1_key_pair" {
   key_name   = "pipeline-key"
   public_key = "${file("files/public.key")}"
 }
+
+#create jenkins instance
+resource "aws_instance" "web" {
+  ami           = "${lookup(var.aws_amis, var.aws_region)}"
+  instance_type = "t2.medium"
+  subnet_id     = "${aws_subnet.pipeline_1_vpc_subnet_1.id}"
+  vpc_security_group_ids  = ["${aws_security_group.pipeline_1_security_group_ec2.id}"]
+  key_name = "${aws_key_pair.pipeline_1_key_pair.key_name}"
+  tags {
+    Name = "Jenkins Box"
+    Env  = "jenkins"
+  }
+  root_block_device {
+    volume_size = "40"
+  }
+}
+
 #create the launch configuration configuration
-
-
-module "qa_environment_blue" {
-  source = "./modules/bluegreen"
-  vpc_id = "${aws_vpc.pipeline_1_vpc.id}"
-  aws_region = "${var.aws_region}"
-  environment = "qa"
-  deployment = "blue"
-  asg_secgroup = "${aws_security_group.pipeline_1_security_group_ec2.id}"
-  elb_secgroup = "${aws_security_group.pipeline_1_security_group_elb.id}"
-}
-module "staging_environment_blue" {
-  source = "./modules/bluegreen"
-  vpc_id = "${aws_vpc.pipeline_1_vpc.id}"
-  aws_region = "${var.aws_region}"
-  environment = "staging"
-  deployment = "blue"
-  asg_secgroup = "${aws_security_group.pipeline_1_security_group_ec2.id}"
-  elb_secgroup = "${aws_security_group.pipeline_1_security_group_elb.id}"
-}
-module "staging_environment_green" {
-  source = "./modules/bluegreen"
-  vpc_id = "${aws_vpc.pipeline_1_vpc.id}"
-  aws_region = "${var.aws_region}"
-  environment = "staging"
-  deployment = "green"
-  asg_secgroup = "${aws_security_group.pipeline_1_security_group_ec2.id}"
-  elb_secgroup = "${aws_security_group.pipeline_1_security_group_elb.id}"
-}

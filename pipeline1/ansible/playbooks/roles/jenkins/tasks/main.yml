@@ -1,0 +1,34 @@
+- name: install pip
+  become: true
+  yum:
+      name: "{{ item }}"
+      state: present
+  with_items:
+      - epel-release
+      - python-pip
+      - git
+
+-  name: Download the application from git
+   git:
+      repo: https://github.com/simplytunde/tutorial.git
+      dest: ~/tutorial
+      version: master
+- name: install python docker
+  become: true
+  pip:
+    name: docker
+- name: Build image and with buildargs
+  docker_image:
+      path: "~/tutorial/pipeline1/playbooks/roles/jenkins/files"
+      name: tunde/jenkins:v1
+- name: Run docker init
+  command: docker swarm init
+  args:
+    creates: /tmp/docker-init-started
+- file:
+    path: /tmp/docker-init-started
+    state: touch
+- name: Start the app
+  command: docker stack deploy -c jenkins.yml jenkins_service
+  args:
+    chdir: "{{ role_path }}/files"

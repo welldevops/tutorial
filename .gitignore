@@ -1,5 +1,6 @@
-jenkins_jobs.ini
-.tfstate
-.tfstate.backup
-commands.txt
-.retry
+*jenkins_jobs.ini
+*.tfstate
+*.tfstate.backup
+*commands.txt
+*.retry
+*.terraform/

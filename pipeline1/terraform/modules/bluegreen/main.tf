@@ -1,22 +1,36 @@
 #create load balancer and autoscaling group of QA environment
-
-data "aws_availability_zones" "all" {
-
+data "aws_vpc" "pipeline" {
+   tags {
+       Name = "pipeline_1_vpc"
+    }
 }
 data "aws_subnet_ids" "all" {
-  vpc_id = "${var.vpc_id}"
+  vpc_id = "${data.aws_vpc.pipeline.id}"
+}
+data "aws_ami" "deployment_image" {
+    most_recent = true
+    filter {
+      name = "tag:version"
+      values = ["${var.version}"]
+    }
+    owners = ["self"]
 }
 
-
+data "aws_security_group" "asg" {
+  name = "pipeline-1-security-group-ec2"
+}
+data "aws_security_group" "elb" {
+  name = "pipeline-1-security-group-elb"
+}
 
 resource "aws_launch_configuration" "pipeline_1_launch_config" {
   # name          = "pipeline-1-launch-config-${var.environment}-${var.deployment}"
-  image_id      = "${lookup(var.aws_amis, var.aws_region)}"
+  image_id      = "${data.aws_ami.deployment_image.image_id}"
   instance_type = "${var.instance_type}"
 
   # Security group
-  security_groups = ["${var.asg_secgroup}"]
-  user_data       = "${file("files/userdata.sh")}"
+  security_groups = ["${data.aws_security_group.asg.id}"]
+  user_data       = "${file("../files/userdata.sh")}"
   key_name        = "pipeline-key"
   lifecycle {
       create_before_destroy = true
@@ -30,10 +44,10 @@ resource "aws_elb" "pipeline_1_elb" {
   subnets = ["${data.aws_subnet_ids.all.ids}"]
 
 
-  security_groups = ["${var.elb_secgroup}"]
+  security_groups = ["${data.aws_security_group.elb.id}"]
 
   listener {
-    instance_port     = 80
+    instance_port     = 3000
     instance_protocol = "http"
     lb_port           = 80
     lb_protocol       = "http"
@@ -43,7 +57,7 @@ resource "aws_elb" "pipeline_1_elb" {
     healthy_threshold   = 10
     unhealthy_threshold = 2
     timeout             = 3
-    target              = "HTTP:80/"
+    target              = "TCP:3000"
     interval            = 30
   }
 
@@ -54,6 +68,7 @@ resource "aws_elb" "pipeline_1_elb" {
   connection_draining_timeout = 400
   tags {
      Name = "pipeline-1-elb-${var.environment}-${var.deployment}"
+     Env  = "${var.environment}-${var.deployment}"
  }
 }
 
@@ -77,5 +92,20 @@ resource "aws_autoscaling_group" "pipeline_1_asg" {
     key                 = "Env"
     value               = "${var.environment}"
     propagate_at_launch = "true"
+  }
+}
+
+#create route53 record for the environment
+data "aws_route53_zone" "main" {
+  name         = "${var.zone_name}"
+}
+resource "aws_route53_record" "env" {
+  zone_id = "${data.aws_route53_zone.main.zone_id}"
+  name    = "${var.environment}${var.deployment}.${data.aws_route53_zone.main.name}"
+  type    = "A"
+  alias {
+    name = "${aws_elb.pipeline_1_elb.dns_name}"
+    zone_id = "${aws_elb.pipeline_1_elb.zone_id }"
+    evaluate_target_health = "false"
   }
 }
