@@ -3,9 +3,9 @@ version: '3.1'
 services:
 
   main:
-    image: tunde/jenkins:latest
+    image: blackpearl/jenkins:v1.0
     volumes:
-      - /var/jenkins_home:/var/jenkins_home
+      - ~/jenkins_home:/var/jenkins_home
     ports:
       - 8080:8080
       - 50000:50000

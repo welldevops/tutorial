@@ -16,11 +16,13 @@
 - name: install python docker
   become: true
   pip:
-    name: docker
+    name: docker-py
+- shell: pwd && ls ~/tutorial/pipeline1/ansible/playbooks/roles/jenkins/files
+  register: haha
+- debug: var=haha
 - name: Build image and with buildargs
   docker_image:
-      path: /home/ec2-user/tutorial/pipeline1/ansible/playbooks/roles/jenkins/files
-      name: tunde/jenkins:v1
+      name: blackpearl/jenkins:v1.0
 - name: Run docker init
   command: docker swarm init
   args:
@@ -31,4 +33,4 @@
 - name: Start the app
   command: docker stack deploy -c jenkins.yml jenkins_service
   args:
-    chdir: "{{ role_path }}/files"
+    chdir: "~/tutorial/jenkins"

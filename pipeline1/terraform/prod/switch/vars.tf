@@ -9,5 +9,5 @@ variable site {
    description = "site to switch to"
 }
 variable environment {
-   default = "staging"
+   default = "prod"
 }

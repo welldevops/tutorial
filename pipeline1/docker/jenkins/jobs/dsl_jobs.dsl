@@ -1,17 +1,17 @@
-def appGitUrl="https://github.com/simplytunde/tutorial"
-def appGitUrlBranch="master"
+def configGitUrl="https://github.com/simplytunde/tutorial"
+def configGitUrlBranch="master"
 job('deploy-to-qa'){
      scm {
         git {
            remote {
                name('origin')
-               url(appGitUrl)
+               url(configGitUrl)
            }
-           branch(appGitUrlBranch)
+           branch(configGitUrlBranch)
         }
     }
     steps {
-        shell("cd pipeline1/terraform && terraform init && terraform plan")
+        shell("cd ${WORKSPACE}/tutorial/pipeline1/ansible && ansible-playbook playbooks/install_locally.yml -i inventories/calendarapp.yml --extra-vars "release=feature"")
     }
 }
 job('create-infrastructure'){

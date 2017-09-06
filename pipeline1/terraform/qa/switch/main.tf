@@ -8,7 +8,7 @@ resource "aws_route53_record" "env" {
   zone_id = "${data.aws_route53_zone.main.zone_id}"
   name    = "${var.environment}.${data.aws_route53_zone.main.name}"
   type    = "CNAME"
-  ttl     = "5"
+  ttl     = "1"
 
   weighted_routing_policy {
     weight = 10
