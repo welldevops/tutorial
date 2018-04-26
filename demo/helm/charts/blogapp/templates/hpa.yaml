@@ -1,12 +1,12 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: rapididentity-{{.Values.tenant}}-hpa
+  name: blogapp-{{.Values.site}}-hpa
 spec:
   scaleTargetRef:
     apiVersion: extensions/v1beta1
     kind: Deployment
-    name: rapididentity-{{.Values.tenant}}
+    name: blogapp-{{.Values.site}}
   minReplicas: 1
   maxReplicas: 2
   metrics:

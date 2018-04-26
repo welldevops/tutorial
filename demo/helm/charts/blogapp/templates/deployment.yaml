@@ -1,0 +1,42 @@
+---
+# Deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: blogapp-{{.Values.site}}
+spec:
+  replicas: 1 # number of replicas
+  template:
+    metadata:
+      labels:
+        tenant: {{.Values.site}}
+        app: blogapp
+    spec:
+      initContainers:
+      - name: config-data
+        image: alpine/git
+        args: ["clone", "--branch", "{{.Values.branch}}", "--single-branch", "{{.Values.app_git}}", "/srv/jekyll"]
+        volumeMounts:
+         - name: shared-repo
+           mountPath: /srv/jekyll
+      containers:
+        - name: blogapp
+          image: {{.Values.image}}:{{.Values.image_tag}}
+          ports:
+            - containerPort: 4000
+          volumeMounts:
+            - mountPath: /srv/jekyll
+              name: shared-repo
+          resources:
+            limits:
+              memory: 2Gi
+              cpu: 2
+            requests:
+              memory: 0.5Gi
+              cpu: 1
+      volumes:
+        - name: git-volume
+          gitRepo:
+            repository: "https://github.com/daattali/beautiful-jekyll.git"
+        - name: shared-repo
+          emptyDir: {}

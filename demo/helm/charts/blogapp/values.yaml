@@ -1,0 +1,5 @@
+image: 143464472856.dkr.ecr.us-east-1.amazonaws.com/blogapp
+image_tag: v1
+cert_arn: arn:aws:acm:us-east-1:143464472856:certificate/221709eb-a1fd-4104-af07-38e16394817f
+domainName: opencoinproject.com
+app_git: https://github.com/simplytunde/blog-app

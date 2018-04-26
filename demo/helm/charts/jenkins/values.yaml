@@ -68,11 +68,14 @@ Master:
   # JMXPort: 4000
   # List of plugins to be install during Jenkins master start
   InstallPlugins:
-    - kubernetes:1.1
-    - workflow-aggregator:2.5
-    - workflow-job:2.15
-    - credentials-binding:1.13
-    - git:3.6.4
+    - kubernetes
+    - workflow-aggregator
+    - workflow-job
+    - credentials-binding
+    - git
+    - blueocean
+    - docker-workflow
+    - amazon-ecr
   # Used to approve a list of groovy functions in pipelines used the script-security plugin. Can be viewed under /scriptApproval
   # ScriptApproval:
   #   - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
@@ -124,6 +127,9 @@ Agent:
   # Configure the attributes as they appear in the corresponding Java class for that type
   # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes
   volumes:
+    - type: HostPath
+      hostPath: /var/run/docker.sock
+      mountPath: /var/run/docker.sock
   # - type: Secret
   #   secretName: mysecret
   #   mountPath: /var/myapp/mysecret
@@ -168,7 +174,7 @@ NetworkPolicy:
 ## Install Default RBAC roles and bindings
 rbac:
   install: true
-  serviceAccountName: default
+  serviceAccountName: jenkins
   # RBAC api version (currently either v1beta1 or v1alpha1)
   apiVersion: v1beta1
   # Cluster role reference

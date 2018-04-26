@@ -1,49 +1,43 @@
-pipeline {
-    agent any
-    environment {
-        
+podTemplate(label: 'docker',
+  containers: [
+      containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
+      containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.0', command: 'cat', ttyEnabled: true),
+      containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
+  ],
+  volumes: [
+    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+  ]) {
+
+  def image = "jenkins/jnlp-slave"
+  node('docker') {
+   stage('Upgrade Deployment') {
+      git 'https://github.com/jenkinsci/docker-jnlp-slave.git'
+      if (env.BRANCH_NAME == 'dev') {
+         container('helm') {
+             sh "helm install --name blogapp-prod --set branch=master --set site=prod blogapp/ --namespace prod"
+         }
+      }else{
+        if (env.BRANCH_NAME == 'staging') {
+           container('helm') {
+              sh "helm install --name blogapp-staging --set branch=staging --set site=staging blogapp/ --namespace staging"
+           }
+        }else{
+           container('helm') {
+               sh "helm install --name blogapp-dev --set branch=dev --set site=dev blogapp/ --namespace dev"
+           }
+        }
+      }
     }
-    stages {
-        stage('Build Docker image') {
-            steps {
-
-            }
+    stage('Build and push ECR image') {
+      git 'https://github.com/jenkinsci/docker-jnlp-slave.git'
+      container('docker') {
+        sh "docker build -t blogapp:v1 ."
+        docker.withRegistry('https://143464472856.dkr.ecr.us-east-1.amazonaws.com', 'ecr:us-east-1:ecr-aws-credentials') {
+           git url: "https://github.com/jenkinsci/docker-jnlp-slave.git"
+           docker.image('blogapp').push('latest')
         }
-        stage('Push Docker image ') {
-            steps {
-
-            }
-        }
-        stage('Deploy To Dev Environment ') {
-            steps {
-
-            }
-        }
-        stage('Run Test Against Dev Environment ') {
-            steps {
-
-            }
-        }
-
-        stage('Deploy To Staging Environment ') {
-            steps {
-
-            }
-        }
-        stage('Run Test Against Dev Environment ') {
-            steps {
-
-            }
-        }
-        stage('Release to Production') {
-            steps {
-
-            }
-        }
-        stage('Send Message To Slack) {
-            steps {
-
-            }
-        }
+      }
     }
+
+  }
 }

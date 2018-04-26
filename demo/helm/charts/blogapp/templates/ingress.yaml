@@ -3,7 +3,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: "rapididentity-{{.Values.tenant}}"
+  name: "blogapp-{{.Values.site}}"
   annotations:
     kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/affinity: "cookie"
@@ -11,13 +11,13 @@ metadata:
     ingress.kubernetes.io/session-cookie-hash: "sha1"
 
   labels:
-    app: rapididentity
+    app: blogapp
 spec:
   rules:
-  - host: {{.Values.tenant}}.idautoengineering.net
+  - host: {{.Values.site}}.{{.Values.domainName}}
     http:
       paths:
       - path: /
         backend:
-          serviceName: "rapididentity-{{.Values.tenant}}"
-          servicePort: 8081
+          serviceName: "blogapp-{{.Values.site}}"
+          servicePort: 4000
