@@ -40,7 +40,7 @@ pipeline {
 
             }
         }
-        stage('Send Message To Slack) {
+        stage('Send Message To Slack') {
             steps {
 
             }
