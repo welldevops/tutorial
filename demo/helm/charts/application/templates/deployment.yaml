@@ -1,0 +1,73 @@
+---
+# Deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: application-{{.Values.tenant}}
+spec:
+  replicas: 1 # number of replicas
+  template:
+    metadata:
+      labels:
+        tenant: {{.Values.tenant}}
+        app: application
+      annotations:
+        iam.amazonaws.com/role: {{.Values.rapid_container_role}}/
+    spec:
+      containers:
+        - name: rapididentity
+          image: {{.Values.image}}:{{.Values.image_tag}}
+          env:
+            - name: LOG_FORMAT
+              value: "fluentd"
+          args:
+            - '-XX:+UnlockExperimentalVMOptions'
+            - '-XX:+UseCGroupMemoryLimitForHeap'
+            - '-Dcapabilities=admin,portal,idp,federation'
+            - '-Djmx.username=admin'
+            - '-Djmx.password=admin'
+            - '-Djmx.hostname=localhost'
+            - '-Ddb.type=mysql'
+            - '-Ddb.host={{.Values.databaseHost}}'
+            - '-Ddb.database={{.Values.tenant}}'
+            - '-Ddb.username=idautoAdmin'
+            - '-Ddb.password=idautoAdmin'
+            - '-Dlog.format=fluentd'
+          ports:
+            - containerPort: 8080
+            - containerPort: 8081
+            - containerPort: 8443
+            - containerPort: 10001
+          resources:
+            limits:
+              memory: 1.536Gi
+              cpu: 2
+            requests:
+              memory: 1.28Gi
+              cpu: 0.33
+          volumeMounts:
+# after we add support for single root shared directories
+#            - name: efs-shared
+#              mountPath: "/var/opt/idauto/mnt/shared"
+            - name: efs-shared
+              mountPath: "/var/opt/idauto/wfmAttachments"
+              subPath: shared/wfmAttachments
+            - name: efs-shared
+              mountPath: "/var/opt/idauto/icons"
+              subPath: shared/icons
+            - name: efs-shared
+              mountPath: "/var/opt/idauto/apps/images"
+              subPath: shared/apps/images
+            - name: efs-shared
+              mountPath: "/var/opt/idauto/common/lib"
+              subPath: shared/common/lib
+            - name: efs-shared
+              mountPath: "/var/opt/idauto/dss/files"
+              subPath: shared/dss/files
+            - name: efs-shared
+              mountPath: "/var/opt/idauto/dss/projects"
+              subPath: shared/dss/projects
+      volumes:
+            - name: efs-shared
+              persistentVolumeClaim:
+                 claimName: efs

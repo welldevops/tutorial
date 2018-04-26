@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+    environment {
+        
+    }
+    stages {
+        stage('Build Docker image') {
+            steps {
+
+            }
+        }
+        stage('Push Docker image ') {
+            steps {
+
+            }
+        }
+        stage('Deploy To Dev Environment ') {
+            steps {
+
+            }
+        }
+        stage('Run Test Against Dev Environment ') {
+            steps {
+
+            }
+        }
+
+        stage('Deploy To Staging Environment ') {
+            steps {
+
+            }
+        }
+        stage('Run Test Against Dev Environment ') {
+            steps {
+
+            }
+        }
+        stage('Release to Production') {
+            steps {
+
+            }
+        }
+        stage('Send Message To Slack) {
+            steps {
+
+            }
+        }
+    }
+}

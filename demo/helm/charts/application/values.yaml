@@ -1,0 +1,8 @@
+image: 071093231757.dkr.ecr.us-east-1.amazonaws.com/rapididentity
+image_tag: fluentd
+databaseHost: rds-prod.database.svc.ncdpi.engineering.net
+appUsername: admin
+appPassword: admin
+cert_arn: arn:aws:acm:us-east-1:071093231757:certificate/4ac8d858-2260-47f8-a185-52040d36c8ac
+rapid_container_role: arn:aws:iam::071093231757:role/ncdpi.idautoengineering.net-rapid-container-role
+domainName: idautoengineering.net

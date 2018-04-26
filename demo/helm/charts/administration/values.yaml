@@ -1,0 +1,2 @@
+#rapi container AssumeRole
+rapid_container_role: arn:aws:iam::071093231757:role/ncdpi.idautoengineering.net-rapid-container-role
