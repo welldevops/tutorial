@@ -29,11 +29,11 @@ spec:
               name: shared-repo
           resources:
             limits:
-              memory: 2Gi
-              cpu: 2
-            requests:
-              memory: 0.5Gi
+              memory: 1Gi
               cpu: 1
+            requests:
+              memory: 0.2Gi
+              cpu: 0.3
       volumes:
         - name: git-volume
           gitRepo:
