@@ -42,6 +42,9 @@ Master:
   # Master Service annotations
   ServiceAnnotations:
     external-dns.alpha.kubernetes.io/hostname: jenkins.opencoinproject.com.
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "*"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:143464472856:certificate/221709eb-a1fd-4104-af07-38e16394817f
   #   service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
   # Used to create Ingress record (should used with ServiceType: ClusterIP)
   # HostName: jenkins.cluster.local
